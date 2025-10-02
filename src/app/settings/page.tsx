@@ -10,10 +10,14 @@ import {
   Globe,
   Save,
   Eye,
-  EyeOff
+  EyeOff,
+  Upload,
+  Sparkles
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SettingsPage() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [settings, setSettings] = useState({
@@ -41,11 +45,17 @@ export default function SettingsPage() {
       theme: 'light',
       language: 'en',
       timezone: 'America/New_York'
+    },
+    branding: {
+      primaryColor: '#ec4899',
+      secondaryColor: '#8b5cf6',
+      logo: null
     }
   });
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },
+    { id: 'branding', name: t('branding.title'), icon: Sparkles },
     { id: 'notifications', name: 'Notifications', icon: Bell },
     { id: 'security', name: 'Security', icon: Shield },
     { id: 'appearance', name: 'Appearance', icon: Palette },
@@ -176,6 +186,119 @@ export default function SettingsPage() {
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'branding' && (
+              <div className="p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('branding.title')}</h2>
+                <div className="space-y-6">
+                  {/* Logo Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('branding.logo')}
+                    </label>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-white" />
+                      </div>
+                      <div>
+                        <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                          <Upload className="w-4 h-4" />
+                          <span>Upload Logo</span>
+                        </button>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Brand Colors */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">{t('branding.colors')}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t('branding.primary')}
+                        </label>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="color"
+                            value={settings.branding.primaryColor}
+                            onChange={(e) => setSettings({
+                              ...settings,
+                              branding: { ...settings.branding, primaryColor: e.target.value }
+                            })}
+                            className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={settings.branding.primaryColor}
+                            onChange={(e) => setSettings({
+                              ...settings,
+                              branding: { ...settings.branding, primaryColor: e.target.value }
+                            })}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t('branding.secondary')}
+                        </label>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="color"
+                            value={settings.branding.secondaryColor}
+                            onChange={(e) => setSettings({
+                              ...settings,
+                              branding: { ...settings.branding, secondaryColor: e.target.value }
+                            })}
+                            className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={settings.branding.secondaryColor}
+                            onChange={(e) => setSettings({
+                              ...settings,
+                              branding: { ...settings.branding, secondaryColor: e.target.value }
+                            })}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preview */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">Preview</h3>
+                    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div 
+                          className="w-10 h-10 rounded-lg flex items-center justify-center"
+                          style={{ background: `linear-gradient(to right, ${settings.branding.primaryColor}, ${settings.branding.secondaryColor})` }}
+                        >
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <span className="text-lg font-bold text-gray-900">BeautyHub</span>
+                      </div>
+                      <div className="space-y-2">
+                        <button 
+                          className="px-4 py-2 rounded-lg text-white font-medium"
+                          style={{ backgroundColor: settings.branding.primaryColor }}
+                        >
+                          Primary Button
+                        </button>
+                        <button 
+                          className="px-4 py-2 rounded-lg text-white font-medium ml-2"
+                          style={{ backgroundColor: settings.branding.secondaryColor }}
+                        >
+                          Secondary Button
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

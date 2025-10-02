@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, Globe } from 'lucide-react';
 import { Notification } from '@/types';
+import { mockNotifications } from '@/data/mockData';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 export default function Header() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { language, setLanguage, t } = useLanguage();
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   useEffect(() => {
-    // Fetch notifications
-    fetch('/api/notifications')
-      .then(res => res.json())
-      .then(data => setNotifications(data))
-      .catch(console.error);
+    // Use mock data instead of API calls for demo
+    setNotifications(mockNotifications);
   }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -36,6 +37,44 @@ export default function Header() {
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
+            {/* Language Toggle */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                className="flex items-center space-x-1 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+              >
+                <Globe className="w-4 h-4" />
+                <span className="text-sm font-medium">{language.toUpperCase()}</span>
+              </button>
+              
+              {showLanguageDropdown && (
+                <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border z-50">
+                  <button
+                    onClick={() => {
+                      setLanguage('en');
+                      setShowLanguageDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
+                      language === 'en' ? 'bg-pink-50 text-pink-600' : 'text-gray-700'
+                    }`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage('hr');
+                      setShowLanguageDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${
+                      language === 'hr' ? 'bg-pink-50 text-pink-600' : 'text-gray-700'
+                    }`}
+                  >
+                    Hrvatski
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Notifications */}
             <div className="relative">
               <button
@@ -54,12 +93,12 @@ export default function Header() {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
                   <div className="p-4 border-b">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">{t('notifications.title')}</h3>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-4 text-center text-gray-500">
-                        No notifications
+                        {t('notifications.noNotifications')}
                       </div>
                     ) : (
                       notifications.map((notification) => (

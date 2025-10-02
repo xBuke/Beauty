@@ -187,6 +187,22 @@ export const mockMessages: Message[] = [
 export const mockNotifications: Notification[] = [
   {
     id: '1',
+    title: 'New Instagram Message',
+    message: 'Jessica Lee asked about balayage pricing',
+    type: 'message',
+    timestamp: '2024-10-02T15:30:00Z',
+    isRead: false
+  },
+  {
+    id: '2',
+    title: 'Reminder: Tomorrow 10 AM booking',
+    message: 'Emma Johnson - Haircut & Style appointment',
+    type: 'reminder',
+    timestamp: '2024-10-02T14:30:00Z',
+    isRead: false
+  },
+  {
+    id: '3',
     title: 'New Booking Request',
     message: 'Olivia Chen requested to add eyebrow shaping to Friday appointment',
     type: 'booking',
@@ -194,20 +210,114 @@ export const mockNotifications: Notification[] = [
     isRead: false
   },
   {
-    id: '2',
-    title: 'New Message',
-    message: 'Emma Johnson wants to reschedule tomorrow\'s appointment',
-    type: 'message',
-    timestamp: '2024-10-02T14:30:00Z',
-    isRead: false
-  },
-  {
-    id: '3',
-    title: 'Appointment Reminder',
-    message: 'Sofia Rodriguez has an appointment in 2 hours',
-    type: 'reminder',
+    id: '4',
+    title: 'Payment Received',
+    message: 'Sofia Rodriguez paid $40 for Gel Manicure',
+    type: 'booking',
     timestamp: '2024-10-02T12:00:00Z',
     isRead: true
+  },
+  {
+    id: '5',
+    title: 'New Client Inquiry',
+    message: 'Sarah M. asked about bridal makeup packages',
+    type: 'message',
+    timestamp: '2024-10-02T11:15:00Z',
+    isRead: true
+  }
+];
+
+// Enhanced mock data for better dashboard stats
+export const mockDashboardStats = {
+  totalClients: 120,
+  todayBookings: 5,
+  unreadMessages: 3,
+  monthlyRevenue: 2500,
+  weeklyGrowth: 12
+};
+
+// Mock data for bookings growth chart
+export const mockBookingsGrowthData = [
+  { day: 'Mon', bookings: 8 },
+  { day: 'Tue', bookings: 12 },
+  { day: 'Wed', bookings: 6 },
+  { day: 'Thu', bookings: 15 },
+  { day: 'Fri', bookings: 18 },
+  { day: 'Sat', bookings: 22 },
+  { day: 'Sun', bookings: 14 }
+];
+
+// Enhanced bookings with more variety
+export const mockTodayBookings: Booking[] = [
+  {
+    id: 'today-1',
+    clientId: '1',
+    clientName: 'Ana Marić',
+    serviceId: '6',
+    serviceName: 'Pedikura',
+    date: new Date().toISOString().split('T')[0],
+    time: '14:00',
+    duration: 60,
+    price: 50,
+    status: 'confirmed'
+  },
+  {
+    id: 'today-2',
+    clientId: '2',
+    clientName: 'Marko Petrović',
+    serviceId: '1',
+    serviceName: 'Šišanje',
+    date: new Date().toISOString().split('T')[0],
+    time: '16:30',
+    duration: 60,
+    price: 65,
+    status: 'confirmed'
+  },
+  {
+    id: 'today-3',
+    clientId: '3',
+    clientName: 'Petra Novak',
+    serviceId: '5',
+    serviceName: 'Gel Manikura',
+    date: new Date().toISOString().split('T')[0],
+    time: '18:00',
+    duration: 45,
+    price: 40,
+    status: 'pending'
+  }
+];
+
+// Enhanced recent messages
+export const mockRecentMessages: Message[] = [
+  {
+    id: 'msg-1',
+    clientName: 'Ana Marić',
+    clientContact: '+385 91 123 4567',
+    platform: 'whatsapp',
+    message: 'Pozdrav! Trebam li ponijeti nešto za pedikuru danas?',
+    timestamp: '2024-10-02T13:30:00Z',
+    isRead: false,
+    type: 'inquiry'
+  },
+  {
+    id: 'msg-2',
+    clientName: 'Marko Petrović',
+    clientContact: 'marko.p@email.com',
+    platform: 'facebook',
+    message: 'Koliko košta gel za kosu? Pitanje o cijeni.',
+    timestamp: '2024-10-02T12:15:00Z',
+    isRead: false,
+    type: 'inquiry'
+  },
+  {
+    id: 'msg-3',
+    clientName: 'Petra Novak',
+    clientContact: '@petra_beauty',
+    platform: 'instagram',
+    message: 'Vidila sam vašu objavu! Mogu li rezervirati termin?',
+    timestamp: '2024-10-02T11:45:00Z',
+    isRead: false,
+    type: 'booking'
   }
 ];
 

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Booking, Service, Client, TimeSlot } from '@/types';
 import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
+import BookingCalendar from '@/components/BookingCalendar';
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -188,101 +189,7 @@ export default function BookingsPage() {
 
       {viewMode === 'calendar' ? (
         /* Calendar View */
-        <div className="bg-white rounded-lg shadow-sm border">
-          {/* Calendar Header */}
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {format(selectedDate, 'MMMM yyyy')}
-              </h2>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setSelectedDate(addDays(selectedDate, -7))}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setSelectedDate(new Date())}
-                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
-                >
-                  Today
-                </button>
-                <button
-                  onClick={() => setSelectedDate(addDays(selectedDate, 7))}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="p-6">
-            <div className="grid grid-cols-8 gap-4">
-              {/* Time column header */}
-              <div className="text-sm font-medium text-gray-500">Time</div>
-              
-              {/* Day headers */}
-              {getWeekDays().map((day, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-sm font-medium text-gray-900">
-                    {format(day, 'EEE')}
-                  </div>
-                  <div className={`text-2xl font-bold mt-1 ${
-                    isSameDay(day, new Date()) ? 'text-pink-600' : 'text-gray-900'
-                  }`}>
-                    {format(day, 'd')}
-                  </div>
-                </div>
-              ))}
-
-              {/* Time slots */}
-              {generateTimeSlots().map((slot, slotIndex) => (
-                <React.Fragment key={slotIndex}>
-                  {/* Time label (only show for every hour) */}
-                  {slotIndex % 2 === 0 && (
-                    <div className="text-sm text-gray-500 py-2">
-                      {slot.time}
-                    </div>
-                  )}
-                  {slotIndex % 2 === 1 && <div></div>}
-                  
-                  {/* Day columns */}
-                  {getWeekDays().map((day, dayIndex) => {
-                    const dayBooking = bookings.find(b => 
-                      b.time === slot.time && 
-                      isSameDay(parseISO(b.date), day)
-                    );
-                    
-                    return (
-                      <div
-                        key={dayIndex}
-                        className={`h-12 border border-gray-200 rounded ${
-                          dayBooking 
-                            ? 'bg-pink-100 border-pink-300' 
-                            : 'bg-gray-50 hover:bg-gray-100 cursor-pointer'
-                        }`}
-                      >
-                        {dayBooking && (
-                          <div className="p-1 text-xs">
-                            <div className="font-medium text-pink-800 truncate">
-                              {dayBooking.clientName}
-                            </div>
-                            <div className="text-pink-600 truncate">
-                              {dayBooking.serviceName}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
+        <BookingCalendar />
       ) : (
         /* List View */
         <div className="space-y-6">

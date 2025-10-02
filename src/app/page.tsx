@@ -7,11 +7,26 @@ import {
   MessageSquare, 
   DollarSign, 
   TrendingUp, 
+  TrendingDown,
   Clock,
   Star,
-  Phone
+  Phone,
+  Plus,
+  UserPlus,
+  Send,
+  CalendarPlus
 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Client, Booking, Message } from '@/types';
+import { 
+  mockDashboardStats, 
+  mockTodayBookings, 
+  mockRecentMessages, 
+  mockClients,
+  mockBookingsGrowthData 
+} from '@/data/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
 
 interface DashboardStats {
   totalClients: number;
@@ -22,71 +37,45 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalClients: 0,
-    todayBookings: 0,
-    unreadMessages: 0,
-    monthlyRevenue: 0,
-    weeklyGrowth: 0
-  });
-  const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
-  const [recentMessages, setRecentMessages] = useState<Message[]>([]);
-  const [topClients, setTopClients] = useState<Client[]>([]);
+  const { t } = useLanguage();
+  const [stats, setStats] = useState<DashboardStats>(mockDashboardStats);
+  const [recentBookings, setRecentBookings] = useState<Booking[]>(mockTodayBookings);
+  const [recentMessages, setRecentMessages] = useState<Message[]>(mockRecentMessages);
+  const [topClients, setTopClients] = useState<Client[]>(mockClients.slice(0, 6));
+  const [showQuickActionModal, setShowQuickActionModal] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch dashboard data
-    Promise.all([
-      fetch('/api/clients').then(res => res.json()),
-      fetch('/api/bookings').then(res => res.json()),
-      fetch('/api/messages').then(res => res.json())
-    ]).then(([clients, bookings, messages]) => {
-      // Calculate stats
-      const today = new Date().toISOString().split('T')[0];
-      const todayBookings = bookings.filter((b: Booking) => b.date === today);
-      const unreadMessages = messages.filter((m: Message) => !m.isRead);
-      const monthlyRevenue = bookings
-        .filter((b: Booking) => b.status === 'completed')
-        .reduce((sum: number, b: Booking) => sum + b.price, 0);
-
-      setStats({
-        totalClients: clients.length,
-        todayBookings: todayBookings.length,
-        unreadMessages: unreadMessages.length,
-        monthlyRevenue,
-        weeklyGrowth: 12.5 // Mock growth percentage
-      });
-
-      // Set recent data
-      setRecentBookings(bookings.slice(0, 5));
-      setRecentMessages(messages.slice(0, 5));
-      setTopClients(clients.sort((a: Client, b: Client) => b.totalVisits - a.totalVisits).slice(0, 5));
-    }).catch(console.error);
+    // Use mock data instead of API calls for demo
+    setStats(mockDashboardStats);
+    setRecentBookings(mockTodayBookings);
+    setRecentMessages(mockRecentMessages);
+    setTopClients(mockClients.sort((a, b) => b.totalVisits - a.totalVisits).slice(0, 6));
   }, []);
 
   const statCards = [
     {
-      title: 'Total Clients',
+      title: t('dashboard.totalClients'),
       value: stats.totalClients,
       icon: Users,
       color: 'bg-blue-500',
       change: '+12%'
     },
     {
-      title: 'Today\'s Bookings',
+      title: t('dashboard.todayBookings'),
       value: stats.todayBookings,
       icon: Calendar,
       color: 'bg-green-500',
       change: '+5%'
     },
     {
-      title: 'Unread Messages',
+      title: t('dashboard.unreadMessages'),
       value: stats.unreadMessages,
       icon: MessageSquare,
       color: 'bg-yellow-500',
       change: '-2%'
     },
     {
-      title: 'Monthly Revenue',
+      title: t('dashboard.monthlyRevenue'),
       value: `$${stats.monthlyRevenue.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-purple-500',
@@ -94,13 +83,69 @@ export default function Dashboard() {
     }
   ];
 
+  const QuickActionModal = ({ action, onClose }: { action: string; onClose: () => void }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{action}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ×
+          </button>
+        </div>
+        <div className="space-y-4">
+          {action === t('quickActions.addClient') && (
+            <>
+              <input type="text" placeholder={t('common.name')} className="w-full p-2 border rounded" />
+              <input type="email" placeholder={t('common.email')} className="w-full p-2 border rounded" />
+              <input type="tel" placeholder={t('common.phone')} className="w-full p-2 border rounded" />
+            </>
+          )}
+          {action === t('quickActions.addBooking') && (
+            <>
+              <select className="w-full p-2 border rounded">
+                <option>Select Client</option>
+                <option>Ana Marić</option>
+                <option>Marko Petrović</option>
+              </select>
+              <select className="w-full p-2 border rounded">
+                <option>Select Service</option>
+                <option>Haircut & Style</option>
+                <option>Manicure</option>
+              </select>
+              <input type="date" className="w-full p-2 border rounded" />
+              <input type="time" className="w-full p-2 border rounded" />
+            </>
+          )}
+          {action === t('quickActions.sendMessage') && (
+            <>
+              <select className="w-full p-2 border rounded">
+                <option>Select Client</option>
+                <option>Ana Marić</option>
+                <option>Marko Petrović</option>
+              </select>
+              <textarea placeholder="Message..." className="w-full p-2 border rounded h-24"></textarea>
+            </>
+          )}
+        </div>
+        <div className="flex justify-end space-x-2 mt-6">
+          <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">
+            {t('common.cancel')}
+          </button>
+          <button className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600">
+            {t('common.save')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's what's happening at your salon.</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+          <p className="text-gray-600">{t('dashboard.welcome')}</p>
         </div>
         <div className="text-sm text-gray-500">
           {new Date().toLocaleDateString('en-US', { 
@@ -109,6 +154,34 @@ export default function Dashboard() {
             month: 'long', 
             day: 'numeric' 
           })}
+        </div>
+      </div>
+
+      {/* Quick Actions Bar */}
+      <div className="bg-white rounded-lg shadow-sm border p-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('quickActions.title')}</h3>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setShowQuickActionModal(t('quickActions.addClient'))}
+            className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>{t('quickActions.addClient')}</span>
+          </button>
+          <button
+            onClick={() => setShowQuickActionModal(t('quickActions.addBooking'))}
+            className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <CalendarPlus className="w-4 h-4" />
+            <span>{t('quickActions.addBooking')}</span>
+          </button>
+          <button
+            onClick={() => setShowQuickActionModal(t('quickActions.sendMessage'))}
+            className="flex items-center space-x-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            <Send className="w-4 h-4" />
+            <span>{t('quickActions.sendMessage')}</span>
+          </button>
         </div>
       </div>
 
@@ -121,8 +194,14 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-gray-600">{card.title}</p>
                 <p className="text-2xl font-bold text-gray-900">{card.value}</p>
                 <div className="flex items-center mt-2">
-                  <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">{card.change}</span>
+                  {card.change.startsWith('-') ? (
+                    <TrendingDown className="w-4 h-4 mr-1 text-red-500" />
+                  ) : (
+                    <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                  )}
+                  <span className={`text-sm ${
+                    card.change.startsWith('-') ? 'text-red-600' : 'text-green-600'
+                  }`}>{card.change}</span>
                   <span className="text-sm text-gray-500 ml-1">vs last month</span>
                 </div>
               </div>
@@ -134,12 +213,38 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Bookings Growth Chart */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.bookingsGrowth')}</h2>
+        </div>
+        <div className="p-6">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mockBookingsGrowthData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Line 
+                  type="monotone" 
+                  dataKey="bookings" 
+                  stroke="#ec4899" 
+                  strokeWidth={2}
+                  dot={{ fill: '#ec4899' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Bookings</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recentBookings')}</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -169,7 +274,7 @@ export default function Dashboard() {
         {/* Recent Messages */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Messages</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.recentMessages')}</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -204,7 +309,7 @@ export default function Dashboard() {
       {/* Top Clients */}
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Top Clients</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.topClients')}</h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -219,7 +324,7 @@ export default function Dashboard() {
                   <p className="font-medium text-gray-900">{client.name}</p>
                   <div className="flex items-center space-x-2">
                     <Star className="w-4 h-4 text-yellow-400" />
-                    <span className="text-sm text-gray-600">{client.totalVisits} visits</span>
+                    <span className="text-sm text-gray-600">{client.totalVisits} {t('dashboard.visits')}</span>
                   </div>
                 </div>
               </div>
@@ -227,6 +332,26 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Pricing Teaser */}
+      <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-sm border text-white">
+        <div className="p-6 text-center">
+          <h3 className="text-lg font-semibold mb-2">{t('pricing.teaser')}</h3>
+          <Link href="/pricing">
+            <button className="bg-white text-pink-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+              {t('pricing.viewPricing')}
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick Action Modal */}
+      {showQuickActionModal && (
+        <QuickActionModal 
+          action={showQuickActionModal} 
+          onClose={() => setShowQuickActionModal(null)} 
+        />
+      )}
     </div>
   );
 }
